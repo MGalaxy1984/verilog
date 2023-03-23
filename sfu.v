@@ -121,15 +121,27 @@ module sfu (
     wire [bw_psum+3:0] width_4_sum;
     wire [col*bw_psum-1:0] width_4_norm;
 
-    assign width_4_sum = 
-      {4'b0, width_4_abs_value[(bw_psum)*1-1 : (bw_psum)*0]} +
-      {4'b0, width_4_abs_value[(bw_psum)*2-1 : (bw_psum)*1]} +
-      {4'b0, width_4_abs_value[(bw_psum)*3-1 : (bw_psum)*2]} +
-      {4'b0, width_4_abs_value[(bw_psum)*4-1 : (bw_psum)*3]} +
-      {4'b0, width_4_abs_value[(bw_psum)*5-1 : (bw_psum)*4]} +
-      {4'b0, width_4_abs_value[(bw_psum)*6-1 : (bw_psum)*5]} +
-      {4'b0, width_4_abs_value[(bw_psum)*7-1 : (bw_psum)*6]} +
-      {4'b0, width_4_abs_value[(bw_psum)*8-1 : (bw_psum)*7]} ;
+    wire [bw_psum:0] quarter_sum0, quarter_sum1, quarter_sum2, quarter_sum3;
+    assign quarter_sum0 = {width_4_abs_value[(bw_psum)*1-1 : (bw_psum)*0]} + {width_4_abs_value[(bw_psum)*2-1 : (bw_psum)*1]};
+    assign quarter_sum1 = {width_4_abs_value[(bw_psum)*3-1 : (bw_psum)*2]} + {width_4_abs_value[(bw_psum)*4-1 : (bw_psum)*3]};
+    assign quarter_sum2 = {width_4_abs_value[(bw_psum)*5-1 : (bw_psum)*4]} + {width_4_abs_value[(bw_psum)*6-1 : (bw_psum)*5]};
+    assign quarter_sum3 = {width_4_abs_value[(bw_psum)*7-1 : (bw_psum)*6]} + {width_4_abs_value[(bw_psum)*8-1 : (bw_psum)*7]};
+                
+    wire [bw_psum + 1:0] semi_sum0, semi_sum1;
+    assign semi_sum0 = quarter_sum0 + quarter_sum1;
+    assign semi_sum1 = quarter_sum2 + quarter_sum3;
+
+    assign width_4_sum = semi_sum0 + semi_sum1;
+
+    // assign width_4_sum = 
+    //   {4'b0, width_4_abs_value[(bw_psum)*1-1 : (bw_psum)*0]} +
+    //   {4'b0, width_4_abs_value[(bw_psum)*2-1 : (bw_psum)*1]} +
+    //   {4'b0, width_4_abs_value[(bw_psum)*3-1 : (bw_psum)*2]} +
+    //   {4'b0, width_4_abs_value[(bw_psum)*4-1 : (bw_psum)*3]} +
+    //   {4'b0, width_4_abs_value[(bw_psum)*5-1 : (bw_psum)*4]} +
+    //   {4'b0, width_4_abs_value[(bw_psum)*6-1 : (bw_psum)*5]} +
+    //   {4'b0, width_4_abs_value[(bw_psum)*7-1 : (bw_psum)*6]} +
+    //   {4'b0, width_4_abs_value[(bw_psum)*8-1 : (bw_psum)*7]} ;
 
     // generate
     //   for (i=0; i < col; i=i+1) begin: BIT_4_NORM

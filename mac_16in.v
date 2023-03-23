@@ -59,23 +59,34 @@ generate
   end 
 endgenerate
 
-wire [31:0] tmp_out;
-assign tmp_out = product_pad[(bw+bw+4)*1-1:(bw+bw+4)*0]
-+ product_pad[(bw+bw+4)*2-1:(bw+bw+4)*1]
-+ product_pad[(bw+bw+4)*3-1:(bw+bw+4)*2]
-+ product_pad[(bw+bw+4)*4-1:(bw+bw+4)*3]
-+ product_pad[(bw+bw+4)*5-1:(bw+bw+4)*4]
-+ product_pad[(bw+bw+4)*6-1:(bw+bw+4)*5]
-+ product_pad[(bw+bw+4)*7-1:(bw+bw+4)*6]
-+ product_pad[(bw+bw+4)*8-1:(bw+bw+4)*7];
+// wire [31:0] tmp_out;
+// assign tmp_out = product_pad[(bw+bw+4)*1-1:(bw+bw+4)*0]
+// + product_pad[(bw+bw+4)*2-1:(bw+bw+4)*1]
+// + product_pad[(bw+bw+4)*3-1:(bw+bw+4)*2]
+// + product_pad[(bw+bw+4)*4-1:(bw+bw+4)*3]
+// + product_pad[(bw+bw+4)*5-1:(bw+bw+4)*4]
+// + product_pad[(bw+bw+4)*6-1:(bw+bw+4)*5]
+// + product_pad[(bw+bw+4)*7-1:(bw+bw+4)*6]
+// + product_pad[(bw+bw+4)*8-1:(bw+bw+4)*7];
 
-assign out =  product_pad[(bw+bw+4)*1-1:(bw+bw+4)*0]
-+ product_pad[(bw+bw+4)*2-1:(bw+bw+4)*1]
-+ product_pad[(bw+bw+4)*3-1:(bw+bw+4)*2]
-+ product_pad[(bw+bw+4)*4-1:(bw+bw+4)*3]
-+ product_pad[(bw+bw+4)*5-1:(bw+bw+4)*4]
-+ product_pad[(bw+bw+4)*6-1:(bw+bw+4)*5]
-+ product_pad[(bw+bw+4)*7-1:(bw+bw+4)*6]
-+ product_pad[(bw+bw+4)*8-1:(bw+bw+4)*7];
+wire [bw_psum:0] quarter_sum0,quarter_sum1,quarter_sum2, quarter_sum3;
+assign quarter_sum0 = product_pad[(bw+bw+4)*1-1:(bw+bw+4)*0] + product_pad[(bw+bw+4)*2-1:(bw+bw+4)*1];
+assign quarter_sum1 = product_pad[(bw+bw+4)*3-1:(bw+bw+4)*2] + product_pad[(bw+bw+4)*4-1:(bw+bw+4)*3];
+assign quarter_sum2 = product_pad[(bw+bw+4)*5-1:(bw+bw+4)*4] + product_pad[(bw+bw+4)*6-1:(bw+bw+4)*5];
+assign quarter_sum3 = product_pad[(bw+bw+4)*7-1:(bw+bw+4)*6] +  product_pad[(bw+bw+4)*8-1:(bw+bw+4)*7];
+
+wire [bw_psum+1:0] semi_sum0, semi_sum1;
+assign semi_sum0 = quarter_sum0 + quarter_sum1;
+assign semi_sum1 = quarter_sum2 + quarter_sum3;
+
+assign out = semi_sum0 + semi_sum1;
+// assign out =  product_pad[(bw+bw+4)*1-1:(bw+bw+4)*0]
+// + product_pad[(bw+bw+4)*2-1:(bw+bw+4)*1]
+// + product_pad[(bw+bw+4)*3-1:(bw+bw+4)*2]
+// + product_pad[(bw+bw+4)*4-1:(bw+bw+4)*3]
+// + product_pad[(bw+bw+4)*5-1:(bw+bw+4)*4]
+// + product_pad[(bw+bw+4)*6-1:(bw+bw+4)*5]
+// + product_pad[(bw+bw+4)*7-1:(bw+bw+4)*6]
+// + product_pad[(bw+bw+4)*8-1:(bw+bw+4)*7];
 
 endmodule
