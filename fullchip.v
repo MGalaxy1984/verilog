@@ -31,7 +31,35 @@ wire [bw_psum+6:0] sum_out_core1;
 assign sum_out = sum_out_core0;
 
 wire sfu_fifo_rd_core0, sfu_fifo_rd_core1;
+wire syn_sfu_fifo_rd_core0, syn_sfu_fifo_rd_core1;
+
 wire sfu_fifo_empty_core0, sfu_fifo_empty_core1;
+wire syn_sfu_fifo_empty_core0, syn_sfu_fifo_empty_core1;
+
+sync sync_rd_core0 (
+      .clk(clk_core1),
+      .in(sfu_fifo_rd_core0),
+      .out(syn_sfu_fifo_rd_core0) 
+);
+
+sync sync_rd_core1 (
+      .clk(clk_core0),
+      .in(sfu_fifo_rd_core1),
+      .out(syn_sfu_fifo_rd_core1) 
+);
+
+sync sync_empty_core0 (
+      .clk(clk_core1),
+      .in(sfu_fifo_empty_core0),
+      .out(syn_sfu_fifo_empty_core0) 
+);
+
+sync sync_empty_core1 (
+      .clk(clk_core0),
+      .in(sfu_fifo_empty_core1),
+      .out(syn_sfu_fifo_empty_core1) 
+);
+
 wire [bw_psum+3:0] sfu_sum_core0, sfu_sum_core1;
 
 core #(.index(0), .bw(bw), .bw_psum(bw_psum), .col(col), .pr(pr)) core0 (
@@ -44,6 +72,8 @@ core #(.index(0), .bw(bw), .bw_psum(bw_psum), .col(col), .pr(pr)) core0 (
       .out(out_core0),
       .sum_out(sum_out_core0),
       .oc_clk(clk_core1),
+      // .oc_sfu_fifo_rd(syn_sfu_fifo_rd_core1),
+      // .oc_sfu_fifo_empty(syn_sfu_fifo_empty_core1),
       .oc_sfu_fifo_rd(sfu_fifo_rd_core1),
       .oc_sfu_fifo_empty(sfu_fifo_empty_core1),
       .oc_sfu_sum(sfu_sum_core1),
@@ -64,6 +94,8 @@ core #(.index(1), .bw(bw), .bw_psum(bw_psum), .col(col), .pr(pr)) core1 (
       .oc_clk(clk_core0),
       .oc_sfu_fifo_rd(sfu_fifo_rd_core0),
       .oc_sfu_fifo_empty(sfu_fifo_empty_core0),
+      // .oc_sfu_fifo_rd(syn_sfu_fifo_rd_core0),
+      // .oc_sfu_fifo_empty(syn_sfu_fifo_empty_core0),
       .oc_sfu_sum(sfu_sum_core0),
       .tc_sfu_fifo_rd(sfu_fifo_rd_core1),
       .tc_sfu_fifo_empty(sfu_fifo_empty_core1),

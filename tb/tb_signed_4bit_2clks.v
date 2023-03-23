@@ -665,8 +665,8 @@ $display("##### move ofifo to pmem #####");
     #0.5 clk = 1'b0;  
     ofifo_rd_core0 = 1; 
     acc_core0 = 1'b1;
-    div_core0 = 1'b1;
     if (q > 0) begin
+      div_core0 = 1'b1;
       pmem_wr_core0 = 1; 
       // pmem_wr_core1 = 1; 
     end
@@ -678,8 +678,9 @@ $display("##### move ofifo to pmem #####");
     #0.5 clk = 1'b1;  
     ofifo_rd_core1 = 1; 
     acc_core1 = 1'b1;
-    div_core1 = 1'b1;
+    
     if (q > 0) begin
+      div_core1 = 1'b1;
       // pmem_wr_core0 = 1; 
       pmem_wr_core1 = 1; 
     end

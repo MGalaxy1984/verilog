@@ -25,7 +25,8 @@ module sfu (
     parameter bw_psum = 2*bw+4; //12
 
     input  clk;
-    input div, acc, reset;
+    input  reset;
+    input  div, acc;  //, exchange;
     
     input width_mode, sign_mode;
 
@@ -191,14 +192,20 @@ module sfu (
     //   end
     // endgenerate
 
+    // reg tc_sfu_wr;
+    // reg tc_sfu_rd;
     wire tc_sfu_wr;
     wire tc_sfu_rd;
-    assign oc_sfu_fifo_rd = tc_sfu_rd;
+    wire oc_sum_wr;
 
-    wire sum_empty, abs_value_empty;
+    assign tc_sfu_fifo_rd = tc_sfu_rd;
+
+    wire sum_empty, oc_sum_empty, abs_value_empty;
     wire sfu_ready;
     assign sfu_ready = !(sum_empty | abs_value_empty | oc_sfu_fifo_empty);
 
+    // reg [bw_psum+3:0] sfu_sum;
+    // reg [col*(bw_psum)-1:0] sfu_abs_value;
     wire [bw_psum+3:0] sfu_sum;
     wire [col*(bw_psum)-1:0] sfu_abs_value;
 
@@ -213,7 +220,7 @@ module sfu (
       .reset(reset),
       .o_empty(sum_empty),
       .in(width_4_sum),
-      .out(sfu_sum)
+      .out(buffered_sfu_sum)
     );
 
     fifo_depth16 #(.bw(bw_psum+4), .simd(1)) output_sum_value_fifo (
@@ -235,25 +242,98 @@ module sfu (
       .reset(reset),
       .o_empty(abs_value_empty),
       .in(value_fifo_in),
-      .out(sfu_abs_value)
+      .out(buffered_sfu_abs_value)
+    );
+
+    fifo_depth16 #(.bw(bw_psum+4), .simd(1)) oc_sum_value_fifo (
+      .rd_clk(clk),
+      .wr_clk(clk),
+      .rd(tc_sfu_rd),
+      .wr(oc_sum_wr),
+      .reset(reset),
+      .o_empty(oc_sum_empty),
+      .in(oc_sfu_sum),
+      .out(buffered_oc_sfu_sum)
     );
 
 
-    assign tc_sfu_wr = acc && ofifo_valid;
-    assign tc_sfu_rd = div && sfu_ready;
+    // assign tc_sfu_wr = acc && ofifo_valid;
+    // assign tc_sfu_rd = div && sfu_ready;
+    assign tc_sfu_wr = acc;
+    assign tc_sfu_rd = div;
+    // assign oc_sum_wr = exchange;
 
-    reg [3:0] acc_counter;
-    reg [3:0] div_counter;
+    // reg [3:0] acc_counter;
+    // reg [3:0] div_counter;
+
+    // reg [col*(bw_psum)-1:0] buffered_sfu_abs_value;
+    // reg  [bw_psum+3:0] buffered_sfu_sum;
+    wire  [bw_psum+3:0] buffered_oc_sfu_sum;
+
+    // always @(posedge clk) begin
+    //   // buffered_sfu_abs_value <= sfu_abs_value;
+    //   // buffered_sfu_sum <= sfu_sum;
+    //   // sfu_sum <= buffered_sfu_sum;
+    //   // sfu_abs_value <= buffered_sfu_abs_value;
+    //   buffered_oc_sfu_sum <= oc_sfu_sum;
+    // end
+
+    wire [col*(bw_psum)-1:0] buffered_sfu_abs_value;
+    wire  [bw_psum+3:0] buffered_sfu_sum;
+    assign sfu_abs_value = buffered_sfu_abs_value;
+    assign sfu_sum = buffered_sfu_sum;
+    //   if (reset) begin
+    //     acc_counter <= 4'b0;
+    //     div_counter <= 4'b0;
+    //     tc_sfu_wr <= 0;
+    //     tc_sfu_rd <= 0;
+    //   end
+    //   else begin
+    //     if (acc) begin
+    //       if (ofifo_valid) begin
+    //         acc_counter <= acc_counter + 1;
+    //         tc_sfu_wr <= 1;
+    //       end
+    //       else
+    //         tc_sfu_wr <= 0;
+    //     end
+    //     if (div) begin
+    //       if (sfu_ready) begin
+    //         tc_sfu_rd <= 1;
+    //         div_counter <= div_counter + 1;
+    //       end
+    //       else 
+    //         tc_sfu_rd <= 0;
+    //     end
+    //   end
+    // end
+
+    // reg [1:0] state; // idle, acc, fetch, div
 
     // always @(posedge clk, posedge reset) begin
     //   if (reset) begin
     //     acc_counter <= 4'b0;
     //     div_counter <= 4'b0;
+    //     tc_sfu_wr <= 0;
+    //     tc_sfu_rd <= 0;
+    //     state <= 0;
     //   end
     //   else begin
     //     if (acc) begin
-    //       if (!ofifo_empty)
+    //       if (ofifo_valid) begin
     //         acc_counter <= acc_counter + 1;
+    //         tc_sfu_wr <= 1;
+    //       end
+    //       else
+    //         tc_sfu_wr <= 0;
+    //     end
+    //     if (div) begin
+    //       if (sfu_ready) begin
+    //         tc_sfu_rd <= 1;
+    //         div_counter <= div_counter + 1;
+    //       end
+    //       else 
+    //         tc_sfu_rd <= 0;
     //     end
     //   end
     // end
