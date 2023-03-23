@@ -1,7 +1,26 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission 
-module core (clk, width_mode, sign_mode, sum_out, mem_in, out, inst, reset, width_mode, sign_mode);
+module core (
+        clk, 
+        width_mode, 
+        sign_mode, 
+        sum_out, 
+        mem_in, 
+        out, 
+        inst, 
+        reset, 
+        width_mode, 
+        sign_mode,
+        oc_clk,
+        oc_sfu_fifo_rd,
+        oc_sfu_fifo_empty,
+        oc_sfu_sum,
+        tc_sfu_fifo_rd,
+        tc_sfu_fifo_empty,
+        tc_sfu_sum
+);
 
+parameter index = 0;
 parameter col = 8;
 parameter bw = 4;
 parameter bw_psum = 2*bw+4;
@@ -13,10 +32,19 @@ wire   [bw_psum*col-1:0] pmem_out;
 input  [pr*bw-1:0] mem_in;
 input  clk;
 // input width_mode, sign_mode;
-input  [16:0] inst; 
+input  [18:0] inst; 
 input  reset;
 input width_mode; // 0 = 4bits, 1 = 8 bits
 input sign_mode; // 0 = unsigned, 1 = signed
+
+input                oc_clk;
+input                oc_sfu_fifo_rd;
+input                oc_sfu_fifo_empty;
+input [bw_psum+3:0]  oc_sfu_sum;
+
+output               tc_sfu_fifo_rd;
+output               tc_sfu_fifo_empty;
+output [bw_psum+3:0] tc_sfu_sum;
 
 wire  [pr*bw-1:0] mac_in;
 wire  [pr*bw-1:0] kmem_out;
@@ -53,6 +81,8 @@ assign pmem_wr = inst[0];
 assign mac_in  = inst[6] ? kmem_out : qmem_out;
 assign pmem_in = sfp_out;
 
+wire fifo_valid;
+
 mac_array #(.bw(bw), .bw_psum(bw_psum), .col(col), .pr(pr)) mac_array_instance (
         .in(mac_in), 
         .clk(clk), 
@@ -75,12 +105,23 @@ ofifo #(.bw(bw_psum), .col(col))  ofifo_inst (
 );
 
 sfu #(.bw(bw), .bw_psum(bw_psum), .col(col)) sfu_instance (
-        .clk(clk),
-        .width_mode(width_mode),
-        .sign_mode(sign_mode),
-        .sfp_in(fifo_out),
+        .clk(clk), 
+        .reset(reset), 
+        .acc(inst[17]), 
+        .div(inst[18]), 
+        .width_mode(width_mode), 
+        .sign_mode(sign_mode), 
+        .sum_out(sum_out), 
+        .sfp_in(fifo_out), 
         .sfp_out(sfp_out),
-        .sum_out(sum_out)
+        .oc_clk(oc_clk),
+        .oc_sfu_fifo_rd(oc_sfu_fifo_rd),
+        .oc_sfu_fifo_empty(oc_sfu_fifo_empty),
+        .oc_sfu_sum(oc_sfu_sum),
+        .tc_sfu_fifo_rd(tc_sfu_fifo_rd),
+        .tc_sfu_fifo_empty(tc_sfu_fifo_empty),
+        .tc_sfu_sum(tc_sfu_sum),
+        .ofifo_valid(fifo_valid)
 );
 
 
@@ -116,7 +157,7 @@ sram_w16 #(.sram_bit(col*bw_psum)) psum_mem_instance (
   //////////// For printing purpose ////////////
   always @(posedge clk) begin
       if(pmem_wr)
-         $display("Memory write to PSUM mem add %x %x ", pmem_add, pmem_in); 
+         $display("Memory write to core %2d, PSUM mem add %x %x ", index, pmem_add, pmem_in); 
   end
 
 

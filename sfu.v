@@ -1,6 +1,24 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission 
-module sfu (clk, other_core_clk, reset, width_mode, acc, div, sign_mode, sum_out, sfp_in, sfp_out);
+module sfu (
+  clk, 
+  reset, 
+  acc, 
+  div, 
+  width_mode, 
+  sign_mode, 
+  sum_out, 
+  sfp_in, 
+  sfp_out,
+  oc_clk,
+  oc_sfu_fifo_rd,
+  oc_sfu_fifo_empty,
+  oc_sfu_sum,
+  tc_sfu_fifo_rd,
+  tc_sfu_fifo_empty,
+  tc_sfu_sum,
+  ofifo_valid
+);
 
     parameter col = 8;
     parameter bw = 4;
@@ -16,12 +34,14 @@ module sfu (clk, other_core_clk, reset, width_mode, acc, div, sign_mode, sum_out
 
     output [bw_psum+6:0] sum_out;
 
+    input ofifo_valid;
+
     input                oc_clk;
     input                oc_sfu_fifo_rd;
     input                oc_sfu_fifo_empty;
     input [bw_psum+3:0]  oc_sfu_sum;
 
-    output               oc_sfu_fifo_rd;
+    output               tc_sfu_fifo_rd;
     output               tc_sfu_fifo_empty;
     output [bw_psum+3:0] tc_sfu_sum;
 
@@ -110,9 +130,18 @@ module sfu (clk, other_core_clk, reset, width_mode, acc, div, sign_mode, sum_out
       {4'b0, width_4_abs_value[(bw_psum)*7-1 : (bw_psum)*6]} +
       {4'b0, width_4_abs_value[(bw_psum)*8-1 : (bw_psum)*7]} ;
 
+    // generate
+    //   for (i=0; i < col; i=i+1) begin: BIT_4_NORM
+    //     assign width_4_norm[(bw_psum)*(i+1)-1:(bw_psum)*(i)] = {width_4_abs_value[(bw_psum)*(i+1)-1 : (bw_psum)*i], 12'b0} / width_4_sum;
+    //   end
+    // endgenerate
+
+    wire [bw_psum+4:0] width_4_2_core_sum;
+    assign width_4_2_core_sum = oc_sfu_sum + sfu_sum;
+
     generate
       for (i=0; i < col; i=i+1) begin: BIT_4_NORM
-        assign width_4_norm[(bw_psum)*(i+1)-1:(bw_psum)*(i)] = {width_4_abs_value[(bw_psum)*(i+1)-1 : (bw_psum)*i], 12'b0} / width_4_sum;
+        assign width_4_norm[(bw_psum)*(i+1)-1:(bw_psum)*(i)] = {sfu_abs_value[(bw_psum)*(i+1)-1 : (bw_psum)*i], 12'b0} / width_4_2_core_sum;
       end
     endgenerate
 
@@ -162,42 +191,69 @@ module sfu (clk, other_core_clk, reset, width_mode, acc, div, sign_mode, sum_out
       end
     endgenerate
 
+    wire tc_sfu_wr;
+    wire tc_sfu_rd;
+    assign oc_sfu_fifo_rd = tc_sfu_rd;
+
+    wire sum_empty, abs_value_empty;
+    wire sfu_ready;
+    assign sfu_ready = !(sum_empty | abs_value_empty | oc_sfu_fifo_empty);
+
+    wire [bw_psum+3:0] sfu_sum;
+    wire [col*(bw_psum)-1:0] sfu_abs_value;
 
     fifo_depth16 #(.bw(bw_psum+4), .simd(1)) sum_value_fifo (
       .rd_clk(clk),
       .wr_clk(clk),
-      .rd(),
-      .wr(),
+      .rd(tc_sfu_rd),
+      .wr(tc_sfu_wr),
       .reset(reset),
-      .o_full(),
-      .o_empty(),
+      .o_empty(sum_empty),
       .in(width_4_sum),
-      .out()
+      .out(sfu_sum)
     );
 
     fifo_depth16 #(.bw(bw_psum+4), .simd(1)) output_sum_value_fifo (
-      .rd_clk(other_core_clk),
+      .rd_clk(oc_clk),
       .wr_clk(clk),
-      .rd(),
-      .wr(),
+      .rd(oc_sfu_fifo_rd),
+      .wr(tc_sfu_wr),
       .reset(reset),
-      .o_full(),
-      .o_empty(),
+      .o_empty(tc_sfu_fifo_empty),
       .in(width_4_sum),
-      .out()
+      .out(tc_sfu_sum)
     );
 
     fifo_depth16 #(.bw(col*(bw_psum)), .simd(1)) abs_value_fifo (
       .rd_clk(clk),
       .wr_clk(clk),
-      .rd(),
-      .wr(),
+      .rd(tc_sfu_rd),
+      .wr(tc_sfu_wr),
       .reset(reset),
-      .o_full(),
-      .o_empty(),
+      .o_empty(abs_value_empty),
       .in(width_4_abs_value),
-      .out()
+      .out(sfu_abs_value)
     );
+
+
+    assign tc_sfu_wr = acc && ofifo_valid;
+    assign tc_sfu_rd = div && sfu_ready;
+
+    reg [3:0] acc_counter;
+    reg [3:0] div_counter;
+
+    // always @(posedge clk, posedge reset) begin
+    //   if (reset) begin
+    //     acc_counter <= 4'b0;
+    //     div_counter <= 4'b0;
+    //   end
+    //   else begin
+    //     if (acc) begin
+    //       if (!ofifo_empty)
+    //         acc_counter <= acc_counter + 1;
+    //     end
+    //   end
+    // end
 
     // generate
     //   for (i=0; i < col; i=i+1) begin: WIDTH_MODE_PROCESS

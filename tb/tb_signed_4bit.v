@@ -44,7 +44,7 @@ reg clk = 0;
 reg [pr*bw-1:0] mem_in_core0, mem_in_core1;
 
 reg ofifo_rd_core0 = 0;
-wire [16:0] inst_core0; 
+wire [18:0] inst_core0; 
 reg qmem_rd_core0 = 0;
 reg qmem_wr_core0 = 0; 
 reg kmem_rd_core0 = 0; 
@@ -55,8 +55,12 @@ reg execute_core0 = 0;
 reg load_core0 = 0;
 reg [3:0] qkmem_add_core0 = 0;
 reg [3:0] pmem_add_core0 = 0;
+reg div_core0 = 0;
+reg acc_core0 = 0;
 
 
+assign inst_core0[18] = div_core0;
+assign inst_core0[17] = acc_core0;
 assign inst_core0[16] = ofifo_rd_core0;
 assign inst_core0[15:12] = qkmem_add_core0;
 assign inst_core0[11:8]  = pmem_add_core0;
@@ -70,7 +74,7 @@ assign inst_core0[1] = pmem_rd_core0;
 assign inst_core0[0] = pmem_wr_core0;
 
 reg ofifo_rd_core1 = 0;
-wire [16:0] inst_core1; 
+wire [18:0] inst_core1; 
 reg qmem_rd_core1 = 0;
 reg qmem_wr_core1 = 0; 
 reg kmem_rd_core1 = 0; 
@@ -81,8 +85,12 @@ reg execute_core1 = 0;
 reg load_core1 = 0;
 reg [3:0] qkmem_add_core1 = 0;
 reg [3:0] pmem_add_core1 = 0;
+reg div_core1 = 0;
+reg acc_core1 = 0;
 
 
+assign inst_core1[18] = div_core1;
+assign inst_core1[17] = acc_core1;
 assign inst_core1[16] = ofifo_rd_core1;
 assign inst_core1[15:12] = qkmem_add_core1;
 assign inst_core1[11:8]  = pmem_add_core1;
@@ -386,6 +394,9 @@ $display("##### Estimated normalization result #####");
       norm_core0[t][q] = tmp_div_core0 / tmp_sum_core0;
       norm_core1[t][q] = tmp_div_core1 / tmp_sum_core1;
 
+      norm_core0[t][q] = tmp_div_core0 / (tmp_sum_core0 + tmp_sum_core1);
+      norm_core1[t][q] = tmp_div_core1 / (tmp_sum_core0 + tmp_sum_core1);
+
       temp5b_core0 = norm_core0[t][q];
       temp16b_core0 = {temp16b_core0[139:0], temp5b_core0};
 
@@ -581,15 +592,22 @@ $display("##### execute #####");
 ////////////// output fifo rd and wb to psum mem ///////////////////
 
 $display("##### move ofifo to pmem #####");
+  #0.5 clk = 1'b0;
+
+  #0.5 clk = 1'b1;
 
   for (q=0; q<total_cycle; q=q+1) begin
     #0.5 clk = 1'b0;  
     ofifo_rd_core0 = 1; 
-    pmem_wr_core0 = 1; 
     ofifo_rd_core1 = 1; 
-    pmem_wr_core1 = 1; 
-
-    if (q>0) begin
+    acc_core0 = 1'b1; div_core0 = 1'b1;
+    acc_core1 = 1'b1; div_core1 = 1'b1;
+    
+    if (q > 0) begin
+      pmem_wr_core0 = 1; 
+      pmem_wr_core1 = 1; 
+    end
+    if (q>1) begin
        pmem_add_core0 = pmem_add_core0 + 1;
        pmem_add_core1 = pmem_add_core1 + 1;
     end
@@ -598,8 +616,17 @@ $display("##### move ofifo to pmem #####");
   end
 
   #0.5 clk = 1'b0;  
+  pmem_add_core0 = pmem_add_core0 + 1;
+  pmem_add_core1 = pmem_add_core1 + 1;
+  acc_core0 = 1'b0; div_core0 = 1'b0;
+  acc_core1 = 1'b0; div_core1 = 1'b0;
+  #0.5 clk = 1'b1;  
+
+  #0.5 clk = 1'b0;  
+  
   pmem_wr_core0 = 0; pmem_add_core0 = 0; ofifo_rd_core0 = 0;
   pmem_wr_core1 = 0; pmem_add_core1 = 0; ofifo_rd_core1 = 0;
+  
   #0.5 clk = 1'b1;  
 
 ///////////////////////////////////////////
