@@ -89,10 +89,10 @@ assign mac_in  = inst[6] ? kmem_out : qmem_out;
 assign pmem_in = sfp_out;
 
 wire [22:0] inst;
-// assign inst = ctrl_inst;
+assign inst = ctrl_inst;
 
-assign inst[18:0] = tb_inst;
-assign inst[22:19] = tb_inst[15:12];
+// assign inst[18:0] = tb_inst;
+// assign inst[22:19] = tb_inst[15:12];
 
 wire fifo_valid;
 

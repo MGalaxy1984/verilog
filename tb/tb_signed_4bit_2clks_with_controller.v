@@ -120,6 +120,7 @@ wire [bw_psum*col*2-1:0] out;
 reg width_mode = 0;
 reg sign_mode = 1;
 
+wire done;
 
 fullchip #(.bw(bw), .bw_psum(bw_psum), .col(col), .pr(pr)) fullchip_instance (
       .reset(reset),
@@ -132,7 +133,8 @@ fullchip #(.bw(bw), .bw_psum(bw_psum), .col(col), .pr(pr)) fullchip_instance (
       .sum_out(sum_out),
       .out(out),
       .width_mode(width_mode),
-      .sign_mode(sign_mode)
+      .sign_mode(sign_mode),
+      .done(done)
 );
 
 
@@ -718,7 +720,12 @@ $display("##### move ofifo to pmem #####");
   //   #0.5 clk = 1'b0;   
   //   #0.5 clk = 1'b1;   
   // end
-
+  for (q=0; q<70; q=q+1) begin
+    #0.5 clk = 1'b0;   
+    #0.5 clk = 1'b1;  
+    if (done)
+      q = q + 100; 
+ end
 
   #10 $finish;
 

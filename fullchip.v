@@ -1,6 +1,6 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission 
-module fullchip (clk_core0, clk_core1, width_mode, sign_mode, mem_in_core0, mem_in_core1, inst_core0, inst_core1, reset, out, sum_out);
+module fullchip (clk_core0, clk_core1, width_mode, sign_mode, mem_in_core0, mem_in_core1, inst_core0, inst_core1, reset, out, sum_out, done);
 
 parameter col = 8;
 parameter bw = 4;
@@ -18,6 +18,7 @@ input  [18:0] inst_core1;
 input  reset;
 output [bw_psum+6:0] sum_out;
 output [bw_psum*col*2-1:0] out;
+output done;
 
 wire clk_core0, clk_core1;
 // assign clk_core0 = clk;
@@ -63,7 +64,7 @@ sync sync_empty_core1 (
 
 wire [bw_psum+3:0] sfu_sum_core0, sfu_sum_core1;
 
-wire done0, done1, done;
+wire done0, done1;
 assign done = done0 && done1;
 
 core #(.index(0), .bw(bw), .bw_psum(bw_psum), .col(col), .pr(pr), .total_cycle(8)) core0 (

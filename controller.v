@@ -15,7 +15,7 @@ output done;
 output [22:0] controller_inst;
 
 assign done = (state == 6);
-assign controller_inst = {kmem_add, sfu_div, sfu_acc, ofifo_rd, qmem_add, pmem_add, qmem_rd, qmem_wr, kmem_rd, kmem_wr, pmem_rd, pmem_wr};
+assign controller_inst = {kmem_add, sfu_div, sfu_acc, ofifo_rd, qmem_add, pmem_add, execute, load, qmem_rd, qmem_wr, kmem_rd, kmem_wr, pmem_rd, pmem_wr};
 
 reg kmem_wr, kmem_rd;
 reg [3:0] kmem_add;
@@ -89,7 +89,7 @@ always @ (posedge clk, posedge reset) begin
          ofifo_rd <= 0;
       end
       else if (state == 1) begin
-         if (counter == col) begin
+         if (counter == col-1) begin
             state <= 2;
             counter <= 0;
 
@@ -119,7 +119,7 @@ always @ (posedge clk, posedge reset) begin
          end
       end
       else if (state == 2) begin
-         if (counter == total_cycle) begin
+         if (counter == total_cycle+1) begin
             state <= 3;
             counter <= 0;
 
@@ -145,14 +145,19 @@ always @ (posedge clk, posedge reset) begin
          end
          else begin
             counter <= counter + 1;
-            qmem_add <= qmem_add + 1;
-            if (counter < col) begin
+            if (counter < total_cycle) begin
+               qmem_add <= qmem_add + 1;
+            end 
+            if (counter > col) begin
+               load <= 0;
+            end
+            if (counter > 0) begin
                kmem_add <= kmem_add + 1;
             end
          end
       end
       else if (state == 3) begin
-         if (counter == total_cycle) begin
+         if (counter == total_cycle + 10) begin
             state <= 4;
             counter <= 0;
 
@@ -179,6 +184,10 @@ always @ (posedge clk, posedge reset) begin
          else begin
             counter <= counter + 1;
             qmem_add <= qmem_add + 1;
+            if (counter > total_cycle) begin
+               qmem_rd <= 0;
+               execute <= 0;
+            end
          end
       end
       else if (state == 4) begin
@@ -209,8 +218,13 @@ always @ (posedge clk, posedge reset) begin
          else begin 
             sfu_div <= 1;
             pmem_wr <= 1;
+            counter <= counter + 1;
             if (counter > 0) begin
                pmem_add <= pmem_add + 1;
+            end
+            if (counter >= total_cycle) begin
+               pmem_wr <= 0;
+               
             end
          end
       end
