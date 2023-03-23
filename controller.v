@@ -177,7 +177,7 @@ always @ (posedge clk, posedge reset) begin
             execute <= 0;
 
             sfu_acc <= 1;
-            sfu_div <= 1;
+            sfu_div <= 0;
 
             ofifo_rd <= 1;
          end
@@ -224,7 +224,7 @@ always @ (posedge clk, posedge reset) begin
             end
             if (counter >= total_cycle) begin
                pmem_wr <= 0;
-               
+
             end
          end
       end
