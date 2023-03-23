@@ -33,7 +33,7 @@ module sfu (
     input  [col*bw_psum-1:0] sfp_in; //95:0
     output [col*bw_psum-1:0] sfp_out; //95:0
 
-    output [bw_psum+6:0] sum_out;
+    output [bw_psum+4:0] sum_out;
 
     input ofifo_valid;
 
@@ -49,11 +49,11 @@ module sfu (
     //assign sfp_out = sfp_in;
 
     // reg [bw_psum+7:0] sum_q; //19:0
-    wire [bw_psum+7:0] sum_q; //19:0
-    reg fifo_wr;
-    reg div_q;
-    wire [bw_psum+3:0] sum_this_core; // 15:0
-    wire  [col*(bw_psum+4)-1:0] abs; //95:0 12 each
+    // wire [bw_psum+7:0] sum_q; //19:0
+    // reg fifo_wr;
+    // reg div_q;
+    // wire [bw_psum+3:0] sum_this_core; // 15:0
+    // wire  [col*(bw_psum+4)-1:0] abs; //95:0 12 each
     //wire  [col*bw_psum-1:0] sfp_in_width8; //95:0 
 
     // wire  [bw_psum+3:0] sfp_in_0_width8; //15:0
@@ -65,10 +65,10 @@ module sfu (
     // wire  [bw_psum+3:0] sfp_in_6_width8;
     // wire  [bw_psum+3:0] sfp_in_7_width8;
 
-    wire [col*(bw_psum+4)-1:0] sfu_in_width_process;
-    wire [4*(bw_psum+5)-1:0] sfu_in_width8;
-    wire [col*(bw_psum+4)-1:0] sfu_in_abs_process_0;
-    wire [col*(bw_psum+4)-1:0] sfu_in_abs_process_1;
+    // wire [col*(bw_psum+4)-1:0] sfu_in_width_process;
+    // wire [4*(bw_psum+5)-1:0] sfu_in_width8;
+    // wire [col*(bw_psum+4)-1:0] sfu_in_abs_process_0;
+    // wire [col*(bw_psum+4)-1:0] sfu_in_abs_process_1;
 
     genvar i;
 
@@ -139,6 +139,7 @@ module sfu (
 
     wire [bw_psum+4:0] width_4_2_core_sum;
     assign width_4_2_core_sum = oc_sfu_sum + sfu_sum;
+    assign sum_out = width_4_2_core_sum;
 
     generate
       for (i=0; i < col; i=i+1) begin: BIT_4_NORM
@@ -245,16 +246,16 @@ module sfu (
       .out(buffered_sfu_abs_value)
     );
 
-    fifo_depth16 #(.bw(bw_psum+4), .simd(1)) oc_sum_value_fifo (
-      .rd_clk(clk),
-      .wr_clk(clk),
-      .rd(tc_sfu_rd),
-      .wr(oc_sum_wr),
-      .reset(reset),
-      .o_empty(oc_sum_empty),
-      .in(oc_sfu_sum),
-      .out(buffered_oc_sfu_sum)
-    );
+    // fifo_depth16 #(.bw(bw_psum+4), .simd(1)) oc_sum_value_fifo (
+    //   .rd_clk(clk),
+    //   .wr_clk(clk),
+    //   .rd(tc_sfu_rd),
+    //   .wr(oc_sum_wr),
+    //   .reset(reset),
+    //   .o_empty(oc_sum_empty),
+    //   .in(oc_sfu_sum),
+    //   .out(buffered_oc_sfu_sum)
+    // );
 
 
     // assign tc_sfu_wr = acc && ofifo_valid;
@@ -268,7 +269,7 @@ module sfu (
 
     // reg [col*(bw_psum)-1:0] buffered_sfu_abs_value;
     // reg  [bw_psum+3:0] buffered_sfu_sum;
-    wire  [bw_psum+3:0] buffered_oc_sfu_sum;
+    // wire  [bw_psum+3:0] buffered_oc_sfu_sum;
 
     // always @(posedge clk) begin
     //   // buffered_sfu_abs_value <= sfu_abs_value;
