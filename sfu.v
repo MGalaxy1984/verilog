@@ -98,7 +98,7 @@ module sfu (
       // end
     // endgenerate
 
-    assign sfp_out = width_mode ? width_8_norm : width_4_norm;
+    assign sfp_out = width_mode ? sfu_abs_value : width_4_norm;
 
     wire [col*(bw_psum)-1:0] width_4_abs_value;
     wire [col*(bw_psum)-1:0] tmp_width_4_abs_value;
@@ -148,48 +148,48 @@ module sfu (
 
 
 
-    wire [4*(bw_psum+4)-1:0] width_8_in;
+    wire [4*(2*bw_psum)-1:0] width_8_in;
 
     generate
       for (i = 0; i < 4; i=i+1) begin: BIT_8_INPUT_PROCESS
-        assign width_8_in[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] = 
+        assign width_8_in[(2*bw_psum)*(i+1)-1:(2*bw_psum)*(i)] = 
           sign_mode ? 
-          {sfp_in[(bw_psum)*(i*2+2)-1:(bw_psum)*(i*2+1)], 4'b0000} + {{(4){sfp_in[(bw_psum)*(i*2+1)-1]}}, sfp_in[(bw_psum)*(i*2+1)-1:(bw_psum)*(i*2)]} :
+          {{(bw_psum-4){sfp_in[(bw_psum)*(i*2+2)-1]}}, sfp_in[(bw_psum)*(i*2+2)-1:(bw_psum)*(i*2+1)], 4'b0000} + {{(bw_psum){sfp_in[(bw_psum)*(i*2+1)-1]}}, sfp_in[(bw_psum)*(i*2+1)-1:(bw_psum)*(i*2)]} :
           {sfp_in[(bw_psum)*(i*2+2)-1:(bw_psum)*(i*2+1)], 4'b0000} + {4'b0000, sfp_in[(bw_psum)*(i*2+1)-1:(bw_psum)*(i*2)]};
       end
 
     endgenerate
-    wire [4*(bw_psum+4)-1:0] width_8_abs_value;
-    wire [4*(bw_psum+4)-1:0] tmp_width_8_abs_value;
+    // wire [4*(bw_psum+4)-1:0] width_8_abs_value;
+    // wire [4*(bw_psum+4)-1:0] tmp_width_8_abs_value;
 
-    generate
-      for (i=0; i < 4; i=i+1) begin: BIT_8_ABS_PROCESS
-        assign tmp_width_8_abs_value[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] = 
-          (width_8_in[(bw_psum+4)*(i+1)-1]) ?  
-          (~width_8_in[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] + 1) :  
-            width_8_in[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)];
+    // generate
+    //   for (i=0; i < 4; i=i+1) begin: BIT_8_ABS_PROCESS
+    //     assign tmp_width_8_abs_value[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] = 
+    //       (width_8_in[(bw_psum+4)*(i+1)-1]) ?  
+    //       (~width_8_in[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] + 1) :  
+    //         width_8_in[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)];
 
-        assign width_8_abs_value[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] = 
-          sign_mode ? 
-          tmp_width_8_abs_value[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] : 
-          width_8_in[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)];
-      end
-    endgenerate
+    //     assign width_8_abs_value[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] = 
+    //       sign_mode ? 
+    //       tmp_width_8_abs_value[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)] : 
+    //       width_8_in[(bw_psum+4)*(i+1)-1:(bw_psum+4)*(i)];
+    //   end
+    // endgenerate
 
-    wire [bw_psum+7:0] width_8_sum;
-    wire [4*(2 * bw_psum)-1:0] width_8_norm;
+    // wire [bw_psum+7:0] width_8_sum;
+    // wire [4*(2 * bw_psum)-1:0] width_8_norm;
 
-    assign width_8_sum = 
-      width_8_abs_value[(bw_psum+4)*1-1 : (bw_psum+4)*0] +
-      width_8_abs_value[(bw_psum+4)*2-1 : (bw_psum+4)*1] +
-      width_8_abs_value[(bw_psum+4)*3-1 : (bw_psum+4)*2] +
-      width_8_abs_value[(bw_psum+4)*4-1 : (bw_psum+4)*3];
+    // assign width_8_sum = 
+    //   width_8_abs_value[(bw_psum+4)*1-1 : (bw_psum+4)*0] +
+    //   width_8_abs_value[(bw_psum+4)*2-1 : (bw_psum+4)*1] +
+    //   width_8_abs_value[(bw_psum+4)*3-1 : (bw_psum+4)*2] +
+    //   width_8_abs_value[(bw_psum+4)*4-1 : (bw_psum+4)*3];
 
-    generate
-      for (i=0; i < 4; i=i+1) begin: BIT_8_NORM
-        assign width_8_norm[(2*bw_psum)*(i+1)-1:(2*bw_psum)*(i)] = {width_8_abs_value[(bw_psum+4)*(i+1)-1 : (bw_psum+4)*i], 12'b0} / width_8_sum;
-      end
-    endgenerate
+    // generate
+    //   for (i=0; i < 4; i=i+1) begin: BIT_8_NORM
+    //     assign width_8_norm[(2*bw_psum)*(i+1)-1:(2*bw_psum)*(i)] = {width_8_abs_value[(bw_psum+4)*(i+1)-1 : (bw_psum+4)*i], 12'b0} / width_8_sum;
+    //   end
+    // endgenerate
 
     wire tc_sfu_wr;
     wire tc_sfu_rd;
@@ -201,6 +201,9 @@ module sfu (
 
     wire [bw_psum+3:0] sfu_sum;
     wire [col*(bw_psum)-1:0] sfu_abs_value;
+
+    wire [col*(bw_psum)-1:0] value_fifo_in;
+    assign value_fifo_in = width_mode ? width_8_in : width_4_abs_value;
 
     fifo_depth16 #(.bw(bw_psum+4), .simd(1)) sum_value_fifo (
       .rd_clk(clk),
@@ -224,14 +227,14 @@ module sfu (
       .out(tc_sfu_sum)
     );
 
-    fifo_depth16 #(.bw(col*(bw_psum)), .simd(1)) abs_value_fifo (
+    fifo_depth16 #(.bw(col*(bw_psum)), .simd(1)) value_fifo (
       .rd_clk(clk),
       .wr_clk(clk),
       .rd(tc_sfu_rd),
       .wr(tc_sfu_wr),
       .reset(reset),
       .o_empty(abs_value_empty),
-      .in(width_4_abs_value),
+      .in(value_fifo_in),
       .out(sfu_abs_value)
     );
 
