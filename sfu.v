@@ -221,7 +221,7 @@ module sfu (
       .reset(reset),
       .o_empty(sum_empty),
       .in(width_4_sum),
-      .out(buffered_sfu_sum)
+      .out(sfu_sum)
     );
 
     fifo_depth16 #(.bw(bw_psum+4), .simd(1)) output_sum_value_fifo (
@@ -243,7 +243,7 @@ module sfu (
       .reset(reset),
       .o_empty(abs_value_empty),
       .in(value_fifo_in),
-      .out(buffered_sfu_abs_value)
+      .out(sfu_abs_value)
     );
 
     // fifo_depth16 #(.bw(bw_psum+4), .simd(1)) oc_sum_value_fifo (
@@ -279,10 +279,10 @@ module sfu (
     //   buffered_oc_sfu_sum <= oc_sfu_sum;
     // end
 
-    wire [col*(bw_psum)-1:0] buffered_sfu_abs_value;
-    wire  [bw_psum+3:0] buffered_sfu_sum;
-    assign sfu_abs_value = buffered_sfu_abs_value;
-    assign sfu_sum = buffered_sfu_sum;
+    // wire [col*(bw_psum)-1:0] buffered_sfu_abs_value;
+    // wire  [bw_psum+3:0] buffered_sfu_sum;
+    // assign sfu_abs_value = buffered_sfu_abs_value;
+    // assign sfu_sum = buffered_sfu_sum;
     //   if (reset) begin
     //     acc_counter <= 4'b0;
     //     div_counter <= 4'b0;
