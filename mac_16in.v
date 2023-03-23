@@ -1,11 +1,12 @@
 // Created by prof. Mingu Kang @VVIP Lab in UCSD ECE department
 // Please do not spread this code without permission 
-module mac_16in (out, a, b, col_index, sign_mode, width_mode);
+module mac_16in (clk, reset, out, a, b, col_index, sign_mode, width_mode);
 
 parameter bw = 4;
 parameter bw_psum = 2*bw+4; //[11:0]
 parameter pr = 8; // parallel factor: number of inputs = 64
 
+input clk, reset;
 output [bw_psum-1:0] out;
 input  [pr*bw-1:0] a; //query
 input  [pr*bw-1:0] b;// kernel
@@ -27,7 +28,7 @@ wire [pr * (bw+bw)-1:0] a_pad;
 wire [pr * (bw+bw)-1:0] b_pad;
 wire [pr * (bw+bw)-1:0] tmp_product;
 wire [pr * (bw+bw)-1:0] product;
-wire [pr * (bw+bw+4)-1:0] product_pad;
+// wire [pr * (bw+bw+4)-1:0] product_pad;
 genvar i;
 
 // wire [(bw+bw)-1:0] a_pad[bw];
@@ -53,11 +54,58 @@ generate
   end 
 endgenerate
 
+// generate
+//   for (i = 0; i < pr; i=i+1) begin: PRODUCT_PADDING
+//     assign product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] = sign_mode ? {{(4){product[(bw+bw)*(i+1)-1]}},product[(bw+bw)*(i+1)-1:(bw+bw)*i]}: {4'b0000, product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
+//   end 
+// endgenerate
+
+reg [pr * (bw+bw+4)-1:0] product_pad;
+
 generate
   for (i = 0; i < pr; i=i+1) begin: PRODUCT_PADDING
-    assign product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] = sign_mode ? {{(4){product[(bw+bw)*(i+1)-1]}},product[(bw+bw)*(i+1)-1:(bw+bw)*i]}: {4'b0000, product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
+    always @(posedge clk, posedge reset) begin
+      if (reset) begin
+        product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] <= 0;
+      end
+      else begin
+        if (sign_mode) begin
+          product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] <= {{(4){product[(bw+bw)*(i+1)-1]}},product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
+        end
+        else begin
+          product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] <= {4'b0000, product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
+        end
+      end
+    end
+      // product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] <= {{(4){product[(bw+bw)*(i+1)-1]}},product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
   end 
 endgenerate
+
+// always @(posedge clk, posedge reset) begin
+//   if (reset)
+//     product_pad <= 0;
+//   else begin
+//     if (sign_mode) begin
+//       generate
+//         for (i = 0; i < pr; i=i+1) begin: PRODUCT_PADDING
+//           product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] <= {{(4){product[(bw+bw)*(i+1)-1]}},product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
+//         end 
+//       endgenerate
+//     end
+//     else begin
+//       generate
+//         for (i = 0; i < pr; i=i+1) begin: PRODUCT_PADDING
+//           product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] <= {4'b0000, product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
+//         end 
+//       endgenerate
+//     end
+//     // generate
+//     //   for (i = 0; i < pr; i=i+1) begin: PRODUCT_PADDING
+//     //     product_pad[(bw+bw+4)*(i+1)-1:(bw+bw+4)*i] <= sign_mode ? {{(4){product[(bw+bw)*(i+1)-1]}},product[(bw+bw)*(i+1)-1:(bw+bw)*i]}: {4'b0000, product[(bw+bw)*(i+1)-1:(bw+bw)*i]};
+//     //   end 
+//     // endgenerate
+//   end
+// end
 
 // wire [31:0] tmp_out;
 // assign tmp_out = product_pad[(bw+bw+4)*1-1:(bw+bw+4)*0]
