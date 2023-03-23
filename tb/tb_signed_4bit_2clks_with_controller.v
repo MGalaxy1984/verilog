@@ -272,7 +272,7 @@ $display("##### K data core0 txt reading #####");
     #0.5 clk = 1'b0;   
     #0.5 clk = 1'b1;   
   end
-  reset = 0;
+  
 
   qk_file = $fopen("E:/VivadoProjects/ECE260B_DualCore/verilog/data/kdata_core0.txt", "r");
 
@@ -416,6 +416,47 @@ $display("##### Estimated normalization result #####");
 
 
 
+///// Kmem writing  /////
+
+$display("##### Kmem writing #####");
+
+  reset = 0;
+
+  for (q=0; q<col; q=q+1) begin
+
+    #0.5 clk = 1'b0;  
+    // kmem_wr_core0 = 1; if (q>0) qkmem_add_core0 = qkmem_add_core0 + 1; 
+    
+    mem_in_core0[1*bw-1:0*bw] = K0[q][0];
+    mem_in_core0[2*bw-1:1*bw] = K0[q][1];
+    mem_in_core0[3*bw-1:2*bw] = K0[q][2];
+    mem_in_core0[4*bw-1:3*bw] = K0[q][3];
+    mem_in_core0[5*bw-1:4*bw] = K0[q][4];
+    mem_in_core0[6*bw-1:5*bw] = K0[q][5];
+    mem_in_core0[7*bw-1:6*bw] = K0[q][6];
+    mem_in_core0[8*bw-1:7*bw] = K0[q][7];
+
+    #0.5 clk = 1'b1;  
+    // kmem_wr_core1 = 1; if (q>0) qkmem_add_core1 = qkmem_add_core1 + 1; 
+    mem_in_core1[1*bw-1:0*bw] = K1[q][0];
+    mem_in_core1[2*bw-1:1*bw] = K1[q][1];
+    mem_in_core1[3*bw-1:2*bw] = K1[q][2];
+    mem_in_core1[4*bw-1:3*bw] = K1[q][3];
+    mem_in_core1[5*bw-1:4*bw] = K1[q][4];
+    mem_in_core1[6*bw-1:5*bw] = K1[q][5];
+    mem_in_core1[7*bw-1:6*bw] = K1[q][6];
+    mem_in_core1[8*bw-1:7*bw] = K1[q][7];
+
+  end
+
+  // #0.5 clk = 1'b0;  
+  // kmem_wr_core0 = 0;  
+  // qkmem_add_core0 = 0;
+  // #0.5 clk = 1'b1;  
+  // kmem_wr_core1 = 0;  
+  // qkmem_add_core1 = 0;
+///////////////////////////////////////////
+
 
 
 ///// Qmem writing  /////
@@ -425,7 +466,7 @@ $display("##### Qmem writing  #####");
   for (q=0; q<total_cycle; q=q+1) begin
 
     #0.5 clk = 1'b0;  
-    qmem_wr_core0 = 1;  if (q>0) qkmem_add_core0 = qkmem_add_core0 + 1; 
+    // qmem_wr_core0 = 1;  if (q>0) qkmem_add_core0 = qkmem_add_core0 + 1; 
     
     mem_in_core0[1*bw-1:0*bw] = Q[q][0];
     mem_in_core0[2*bw-1:1*bw] = Q[q][1];
@@ -437,7 +478,7 @@ $display("##### Qmem writing  #####");
     mem_in_core0[8*bw-1:7*bw] = Q[q][7];
 
     #0.5 clk = 1'b1;  
-    qmem_wr_core1 = 1;  if (q>0) qkmem_add_core1 = qkmem_add_core1 + 1;
+    // qmem_wr_core1 = 1;  if (q>0) qkmem_add_core1 = qkmem_add_core1 + 1;
 
     mem_in_core1[1*bw-1:0*bw] = Q[q][0];
     mem_in_core1[2*bw-1:1*bw] = Q[q][1];
@@ -450,64 +491,26 @@ $display("##### Qmem writing  #####");
   end
 
 
-  #0.5 clk = 1'b0;  
-  qmem_wr_core0 = 0; 
-  qkmem_add_core0 = 0;
+  // #0.5 clk = 1'b0;  
+  // qmem_wr_core0 = 0; 
+  // qkmem_add_core0 = 0;
 
-  #0.5 clk = 1'b1;  
-  qmem_wr_core1 = 0; 
-  qkmem_add_core1 = 0;
+  // #0.5 clk = 1'b1;  
+  // qmem_wr_core1 = 0; 
+  // qkmem_add_core1 = 0;
 ///////////////////////////////////////////
 
 
 
 
 
-///// Kmem writing  /////
-
-$display("##### Kmem writing #####");
-
-  for (q=0; q<col; q=q+1) begin
-
-    #0.5 clk = 1'b0;  
-    kmem_wr_core0 = 1; if (q>0) qkmem_add_core0 = qkmem_add_core0 + 1; 
-    
-    mem_in_core0[1*bw-1:0*bw] = K0[q][0];
-    mem_in_core0[2*bw-1:1*bw] = K0[q][1];
-    mem_in_core0[3*bw-1:2*bw] = K0[q][2];
-    mem_in_core0[4*bw-1:3*bw] = K0[q][3];
-    mem_in_core0[5*bw-1:4*bw] = K0[q][4];
-    mem_in_core0[6*bw-1:5*bw] = K0[q][5];
-    mem_in_core0[7*bw-1:6*bw] = K0[q][6];
-    mem_in_core0[8*bw-1:7*bw] = K0[q][7];
-
-    #0.5 clk = 1'b1;  
-    kmem_wr_core1 = 1; if (q>0) qkmem_add_core1 = qkmem_add_core1 + 1; 
-    mem_in_core1[1*bw-1:0*bw] = K1[q][0];
-    mem_in_core1[2*bw-1:1*bw] = K1[q][1];
-    mem_in_core1[3*bw-1:2*bw] = K1[q][2];
-    mem_in_core1[4*bw-1:3*bw] = K1[q][3];
-    mem_in_core1[5*bw-1:4*bw] = K1[q][4];
-    mem_in_core1[6*bw-1:5*bw] = K1[q][5];
-    mem_in_core1[7*bw-1:6*bw] = K1[q][6];
-    mem_in_core1[8*bw-1:7*bw] = K1[q][7];
-
-  end
-
-  #0.5 clk = 1'b0;  
-  kmem_wr_core0 = 0;  
-  qkmem_add_core0 = 0;
-  #0.5 clk = 1'b1;  
-  kmem_wr_core1 = 0;  
-  qkmem_add_core1 = 0;
-///////////////////////////////////////////
 
 
 
-  for (q=0; q<3; q=q+1) begin
-    #0.5 clk = 1'b0;  
-    #0.5 clk = 1'b1;   
-  end
+  // for (q=0; q<3; q=q+1) begin
+  //   #0.5 clk = 1'b0;  
+  //   #0.5 clk = 1'b1;   
+  // end
 
 
 
@@ -515,39 +518,39 @@ $display("##### Kmem writing #####");
 /////  K data loading  /////
 $display("##### K data loading to processor #####");
 
-  for (q=0; q<col+1; q=q+1) begin
-    #0.5 clk = 1'b0;  
-    load_core0 = 1; 
-    if (q==1) kmem_rd_core0 = 1;
-    if (q>1) begin
-       qkmem_add_core0 = qkmem_add_core0 + 1;
-    end
+//   for (q=0; q<col+1; q=q+1) begin
+//     #0.5 clk = 1'b0;  
+//     load_core0 = 1; 
+//     if (q==1) kmem_rd_core0 = 1;
+//     if (q>1) begin
+//        qkmem_add_core0 = qkmem_add_core0 + 1;
+//     end
 
-    #0.5 clk = 1'b1;  
-    load_core1 = 1;
-    if (q==1) kmem_rd_core1 = 1;
-    if (q>1) begin
-       qkmem_add_core1 = qkmem_add_core1 + 1;
-    end
-  end
+//     #0.5 clk = 1'b1;  
+//     load_core1 = 1;
+//     if (q==1) kmem_rd_core1 = 1;
+//     if (q>1) begin
+//        qkmem_add_core1 = qkmem_add_core1 + 1;
+//     end
+//   end
 
-  #0.5 clk = 1'b0;  
-  kmem_rd_core0 = 0; qkmem_add_core0 = 0;
-  #0.5 clk = 1'b1;  
-  kmem_rd_core1 = 0; qkmem_add_core1 = 0;
+//   #0.5 clk = 1'b0;  
+//   kmem_rd_core0 = 0; qkmem_add_core0 = 0;
+//   #0.5 clk = 1'b1;  
+//   kmem_rd_core1 = 0; qkmem_add_core1 = 0;
 
-  #0.5 clk = 1'b0;  
-  load_core0 = 0; 
+//   #0.5 clk = 1'b0;  
+//   load_core0 = 0; 
   
-  #0.5 clk = 1'b1;  
-  load_core1 = 0; 
+//   #0.5 clk = 1'b1;  
+//   load_core1 = 0; 
 
-///////////////////////////////////////////
+// ///////////////////////////////////////////
 
- for (q=0; q<11; q=q+1) begin
-    #0.5 clk = 1'b0;   
-    #0.5 clk = 1'b1;   
- end
+//  for (q=0; q<11; q=q+1) begin
+//     #0.5 clk = 1'b0;   
+//     #0.5 clk = 1'b1;   
+//  end
 
 
 
@@ -558,34 +561,34 @@ $display("##### execute #####");
 
   for (q=0; q<total_cycle; q=q+1) begin
     #0.5 clk = 1'b0;  
-    execute_core0 = 1; 
-    qmem_rd_core0 = 1;
+    // execute_core0 = 1; 
+    // qmem_rd_core0 = 1;
     
-    if (q>0) begin
-       qkmem_add_core0 = qkmem_add_core0 + 1;
-    end
+    // if (q>0) begin
+    //    qkmem_add_core0 = qkmem_add_core0 + 1;
+    // end
 
     #0.5 clk = 1'b1;  
-    execute_core1 = 1; 
-    qmem_rd_core1 = 1;
-    if (q>0) begin
-       qkmem_add_core1 = qkmem_add_core1 + 1;
-    end
+    // execute_core1 = 1; 
+    // qmem_rd_core1 = 1;
+    // if (q>0) begin
+    //    qkmem_add_core1 = qkmem_add_core1 + 1;
+    // end
   end
 
-  #0.5 clk = 1'b0;  
-  qmem_rd_core0 = 0; qkmem_add_core0 = 0; execute_core0 = 0;
+  // #0.5 clk = 1'b0;  
+  // qmem_rd_core0 = 0; qkmem_add_core0 = 0; execute_core0 = 0;
   
-  #0.5 clk = 1'b1;  
-  qmem_rd_core1 = 0; qkmem_add_core1 = 0; execute_core1 = 0;
+  // #0.5 clk = 1'b1;  
+  // qmem_rd_core1 = 0; qkmem_add_core1 = 0; execute_core1 = 0;
 
 
 ///////////////////////////////////////////
 
- for (q=0; q<11; q=q+1) begin
-    #0.5 clk = 1'b0;   
-    #0.5 clk = 1'b1;   
- end
+//  for (q=0; q<11; q=q+1) begin
+//     #0.5 clk = 1'b0;   
+//     #0.5 clk = 1'b1;   
+//  end
 
 
 
@@ -657,64 +660,64 @@ $display("##### execute #####");
 //   pmem_wr_core1 = 0; pmem_add_core1 = 0; ofifo_rd_core1 = 0;
 
 $display("##### move ofifo to pmem #####");
-  #0.5 clk = 1'b0;
+  // #0.5 clk = 1'b0;
 
-  #0.5 clk = 1'b1;
+  // #0.5 clk = 1'b1;
 
   for (q=0; q<total_cycle; q=q+1) begin
     #0.5 clk = 1'b0;  
-    ofifo_rd_core0 = 1; 
-    acc_core0 = 1'b1;
-    if (q > 0) begin
-      div_core0 = 1'b1;
-      pmem_wr_core0 = 1; 
-      // pmem_wr_core1 = 1; 
-    end
-    if (q>1) begin
-       pmem_add_core0 = pmem_add_core0 + 1;
-      //  pmem_add_core1 = pmem_add_core1 + 1;
-    end
+    // ofifo_rd_core0 = 1; 
+    // acc_core0 = 1'b1;
+    // if (q > 0) begin
+    //   div_core0 = 1'b1;
+    //   pmem_wr_core0 = 1; 
+    //   // pmem_wr_core1 = 1; 
+    // end
+    // if (q>1) begin
+    //    pmem_add_core0 = pmem_add_core0 + 1;
+    //   //  pmem_add_core1 = pmem_add_core1 + 1;
+    // end
 
     #0.5 clk = 1'b1;  
-    ofifo_rd_core1 = 1; 
-    acc_core1 = 1'b1;
+    // ofifo_rd_core1 = 1; 
+    // acc_core1 = 1'b1;
     
-    if (q > 0) begin
-      div_core1 = 1'b1;
-      // pmem_wr_core0 = 1; 
-      pmem_wr_core1 = 1; 
-    end
-    if (q>1) begin
-      //  pmem_add_core0 = pmem_add_core0 + 1;
-       pmem_add_core1 = pmem_add_core1 + 1;
-    end
+    // if (q > 0) begin
+    //   div_core1 = 1'b1;
+    //   // pmem_wr_core0 = 1; 
+    //   pmem_wr_core1 = 1; 
+    // end
+    // if (q>1) begin
+    //   //  pmem_add_core0 = pmem_add_core0 + 1;
+    //    pmem_add_core1 = pmem_add_core1 + 1;
+    // end
   end
 
-  #0.5 clk = 1'b0;  
-  pmem_add_core0 = pmem_add_core0 + 1;
-  div_core0 = 1'b0;
-  acc_core0 = 0;
+  // #0.5 clk = 1'b0;  
+  // pmem_add_core0 = pmem_add_core0 + 1;
+  // div_core0 = 1'b0;
+  // acc_core0 = 0;
   
 
-  #0.5 clk = 1'b1;  
-  pmem_add_core1 = pmem_add_core1 + 1;
-  div_core1 = 1'b0;
-  acc_core1 = 0;
+  // #0.5 clk = 1'b1;  
+  // pmem_add_core1 = pmem_add_core1 + 1;
+  // div_core1 = 1'b0;
+  // acc_core1 = 0;
 
-  #0.5 clk = 1'b0;  
+  // #0.5 clk = 1'b0;  
   
-  pmem_wr_core0 = 0; pmem_add_core0 = 0; ofifo_rd_core0 = 0;
+  // pmem_wr_core0 = 0; pmem_add_core0 = 0; ofifo_rd_core0 = 0;
   
   
-  #0.5 clk = 1'b1;  
-  pmem_wr_core1 = 0; pmem_add_core1 = 0; ofifo_rd_core1 = 0;
+  // #0.5 clk = 1'b1;  
+  // pmem_wr_core1 = 0; pmem_add_core1 = 0; ofifo_rd_core1 = 0;
 
 ///////////////////////////////////////////
 
-  for (q=0; q<10; q=q+1) begin
-    #0.5 clk = 1'b0;   
-    #0.5 clk = 1'b1;   
-  end
+  // for (q=0; q<10; q=q+1) begin
+  //   #0.5 clk = 1'b0;   
+  //   #0.5 clk = 1'b1;   
+  // end
 
 
   #10 $finish;

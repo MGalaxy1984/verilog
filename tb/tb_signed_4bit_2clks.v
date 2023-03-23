@@ -417,6 +417,49 @@ $display("##### Estimated normalization result #####");
 
 
 
+///// Kmem writing  /////
+
+$display("##### Kmem writing #####");
+
+  for (q=0; q<col; q=q+1) begin
+
+    #0.5 clk = 1'b0;  
+    kmem_wr_core0 = 1; if (q>0) qkmem_add_core0 = qkmem_add_core0 + 1; 
+    
+    mem_in_core0[1*bw-1:0*bw] = K0[q][0];
+    mem_in_core0[2*bw-1:1*bw] = K0[q][1];
+    mem_in_core0[3*bw-1:2*bw] = K0[q][2];
+    mem_in_core0[4*bw-1:3*bw] = K0[q][3];
+    mem_in_core0[5*bw-1:4*bw] = K0[q][4];
+    mem_in_core0[6*bw-1:5*bw] = K0[q][5];
+    mem_in_core0[7*bw-1:6*bw] = K0[q][6];
+    mem_in_core0[8*bw-1:7*bw] = K0[q][7];
+
+    #0.5 clk = 1'b1;  
+    kmem_wr_core1 = 1; if (q>0) qkmem_add_core1 = qkmem_add_core1 + 1; 
+    mem_in_core1[1*bw-1:0*bw] = K1[q][0];
+    mem_in_core1[2*bw-1:1*bw] = K1[q][1];
+    mem_in_core1[3*bw-1:2*bw] = K1[q][2];
+    mem_in_core1[4*bw-1:3*bw] = K1[q][3];
+    mem_in_core1[5*bw-1:4*bw] = K1[q][4];
+    mem_in_core1[6*bw-1:5*bw] = K1[q][5];
+    mem_in_core1[7*bw-1:6*bw] = K1[q][6];
+    mem_in_core1[8*bw-1:7*bw] = K1[q][7];
+
+  end
+
+  #0.5 clk = 1'b0;  
+  kmem_wr_core0 = 0;  
+  qkmem_add_core0 = 0;
+  #0.5 clk = 1'b1;  
+  kmem_wr_core1 = 0;  
+  qkmem_add_core1 = 0;
+///////////////////////////////////////////
+
+
+
+
+
 
 ///// Qmem writing  /////
 
@@ -460,54 +503,13 @@ $display("##### Qmem writing  #####");
 ///////////////////////////////////////////
 
 
-
-
-
-///// Kmem writing  /////
-
-$display("##### Kmem writing #####");
-
-  for (q=0; q<col; q=q+1) begin
-
-    #0.5 clk = 1'b0;  
-    kmem_wr_core0 = 1; if (q>0) qkmem_add_core0 = qkmem_add_core0 + 1; 
-    
-    mem_in_core0[1*bw-1:0*bw] = K0[q][0];
-    mem_in_core0[2*bw-1:1*bw] = K0[q][1];
-    mem_in_core0[3*bw-1:2*bw] = K0[q][2];
-    mem_in_core0[4*bw-1:3*bw] = K0[q][3];
-    mem_in_core0[5*bw-1:4*bw] = K0[q][4];
-    mem_in_core0[6*bw-1:5*bw] = K0[q][5];
-    mem_in_core0[7*bw-1:6*bw] = K0[q][6];
-    mem_in_core0[8*bw-1:7*bw] = K0[q][7];
-
-    #0.5 clk = 1'b1;  
-    kmem_wr_core1 = 1; if (q>0) qkmem_add_core1 = qkmem_add_core1 + 1; 
-    mem_in_core1[1*bw-1:0*bw] = K1[q][0];
-    mem_in_core1[2*bw-1:1*bw] = K1[q][1];
-    mem_in_core1[3*bw-1:2*bw] = K1[q][2];
-    mem_in_core1[4*bw-1:3*bw] = K1[q][3];
-    mem_in_core1[5*bw-1:4*bw] = K1[q][4];
-    mem_in_core1[6*bw-1:5*bw] = K1[q][5];
-    mem_in_core1[7*bw-1:6*bw] = K1[q][6];
-    mem_in_core1[8*bw-1:7*bw] = K1[q][7];
-
-  end
-
-  #0.5 clk = 1'b0;  
-  kmem_wr_core0 = 0;  
-  qkmem_add_core0 = 0;
-  #0.5 clk = 1'b1;  
-  kmem_wr_core1 = 0;  
-  qkmem_add_core1 = 0;
-///////////////////////////////////////////
-
-
-
   for (q=0; q<3; q=q+1) begin
     #0.5 clk = 1'b0;  
     #0.5 clk = 1'b1;   
   end
+
+
+
 
 
 
